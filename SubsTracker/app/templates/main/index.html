@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 px-4 text-white">
+    
+    <div class="flex justify-between items-center mb-8 bg-slate-800 p-6 rounded-xl shadow-md">
+        <div>
+            <h2 class="text-2xl font-bold text-emerald-400">SubSTracker Paneli</h2>
+            <p class="text-slate-400 text-sm">Aboneliklerinizi tek noktadan yönetin.</p>
+        </div>
+        <div class="text-right">
+            <p class="text-sm text-slate-400">Hoş geldin, <span class="text-white font-semibold">{{ current_user.username }}</span></p>
+            <p class="text-xs text-slate-400 mt-1">Toplam Aylık Harcama (TL)</p>
+            <p class="text-3xl font-extrabold text-emerald-400">{{ "%.2f"|format(total_spent) }} ₺</p>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="p-4 mb-4 rounded text-sm {% if category == 'success' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-rose-500/20 text-rose-400 border border-rose-500/30{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="mb-8 bg-gradient-to-r from-purple-900 via-slate-800 to-indigo-900 p-6 rounded-xl shadow-lg border border-purple-500/30">
+        <h3 class="text-lg font-bold text-purple-300 mb-3 flex items-center gap-2">✨ SubsAI - Finans Danışmanı Sohbet Robotu</h3>
+        
+        <div class="bg-slate-900/50 p-4 rounded-lg min-h-[80px] mb-4 border border-slate-700 text-sm">
+            {% if ai_response %}
+                <span class="text-xs text-purple-400 font-semibold block mb-1">SubsAI Danışmanı:</span>
+                <p class="text-slate-200 italic leading-relaxed">{{ ai_response }}</p>
+            {% else %}
+                <p class="text-slate-400 italic">Merhaba {{ current_user.username }}! Bütçen veya aboneliklerin hakkında benden tavsiye isteyebilirsin.</p>
+            {% endif %}
+        </div>
+
+        <form method="POST" action="" class="flex gap-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else form.csrf_token.current_token }}">
+            <input type="text" name="user_message" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500" placeholder="Hangi aboneliğimi iptal etmeliyim? / Bütçem nasıl?..." required>
+            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-5 py-2 rounded text-sm transition-colors">Sor</button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="bg-slate-800 p-6 rounded-xl shadow-md h-fit">
+            <h3 class="text-lg font-bold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Yeni Abonelik Ekle</h3>
+            
+            <form method="POST" action="">
+                {{ form.csrf_token }}
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Platform Adı</label>
+                    {{ form.name(class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none", placeholder="Netflix, Spotify, Youtube vb.") }}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Ücret</label>
+                        {{ form.price(class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none", placeholder="0.00") }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Döviz</label>
+                        {{ form.currency(class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none") }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Ödeme Döngüsü</label>
+                    {{ form.billing_cycle(class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none") }}
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Kategori</label>
+                    {{ form.category_id(class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none") }}
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Sonraki Ödeme Tarihi</label>
+                    {% if form.next_billing_date %}
+                        {{ form.next_billing_date(class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none") }}
+                    {% else %}
+                        <input type="date" name="next_billing_date" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none">
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-bold py-2 rounded transition-colors shadow-md">
+                    Abonelik Ekle
+                </button>
+            </form>
+        </div>
+
+        <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl shadow-md">
+            <h3 class="text-lg font-bold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Takip Edilen Abonelikler</h3>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400 text-xs uppercase">
+                            <th class="py-3 px-2">Platform</th>
+                            <th class="py-3 px-2">Kategori</th>
+                            <th class="py-3 px-2">Ücret</th>
+                            <th class="py-3 px-2">Döngü</th>
+                            <th class="py-3 px-2 text-center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if subscriptions %}
+                            {% for sub in subscriptions %}
+                                <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                                    <td class="py-3 px-2 font-semibold">{{ sub.name }}</td>
+                                    <td class="py-3 px-2 text-xs text-slate-300">
+                                        {% if sub.category_id == 1 or sub.category_id == '1' %}Eğlence
+                                        {% elif sub.category_id == 2 or sub.category_id == '2' %}Eğitim
+                                        {% elif sub.category_id == 3 or sub.category_id == '3' %}Yazılım
+                                        {% elif sub.category_id == 4 or sub.category_id == '4' %}Müzik
+                                        {% elif sub.category_id == 5 or sub.category_id == '5' %}Oyun
+                                        {% else %}Diğer{% endif %}
+                                    </td>
+                                    <td class="py-3 px-2 text-emerald-400 font-medium">{{ sub.price }} {{ sub.currency }}</td>
+                                    <td class="py-3 px-2 text-xs text-slate-300">
+                                        {{ getattr(sub, 'billing_period', '') or getattr(sub, 'period', 'Aylık') }}
+                                    </td>
+                                    <td class="py-3 px-2 text-center">
+                                        <a href="{{ url_for('main.delete_subscription', id=sub.id) }}" 
+                                           onclick="return confirm('Bu aboneliği silmek istediğinize emin misiniz?');"
+                                           class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white text-xs px-3 py-1 rounded transition-all">
+                                            Sil
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-slate-500 italic">Henüz hiçbir abonelik eklenmemiş.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

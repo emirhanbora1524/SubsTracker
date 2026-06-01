@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto my-12 text-center bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-lg">
+    <h1 class="text-6xl font-extrabold text-red-500 mb-4">500</h1>
+    <h2 class="text-xl font-bold text-slate-200 mb-2">Sunucu Yoruldu</h2>
+    <p class="text-slate-400 text-sm mb-6">İçsel bir hata oluştu. Mühendislerimiz üzerinde çalışıyor.</p>
+    <a href="{{ url_for('main.index') }}" class="inline-block bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">Ana Sayfaya Dön</a>
+</div>
+{% endblock %}
